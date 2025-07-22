@@ -22,7 +22,7 @@ Here are the understood constraints and assumptions:
 
 ## Solution
 
-A "weighted round-robin" solution is deemed the most-fair. For time constraints, a CLI solution will be implemented first, but will be left extensible so that an API can be implemented later.
+A "weighted round-robin" solution is deemed most-fair. For time constraints, a CLI solution will be implemented first, but will be left extensible so that an API can be implemented later.
 
 ### The Decision Algorithm
 
@@ -33,25 +33,19 @@ more precisely, how much coffee-value have they received since they last paid. A
 
 1. Yesterday, Jim paid for coffee, so his weight would be **0** (no money-value received since he last paid)
 1. Bob had 2 cappucinos since he last paid, so his weight is **12** (2 * $6)
-1. For simplicity, the rest of the team all drinks mochas (costing $4.50) of some variety, and it's been **1, 3, 4, 5, and 6** days since they paid, for weights of **4.5, 13.5, 18, 22.5, and 27**, respectively.
-1. We can represent these weights as consecutive numeric ranges for all members with non-zero weights:
-   1. Bob's range: **0 - 12**
-   1. Teammate #1's range: **>12 - 16.5**
-   1. Teammate #2's range: **>16.5 - 30**
-   1. Teammate #3's range: **>30 - 48**
-   1. Teammate #4's range: **>48 - 70.5**
-   1. Teammate #5's range: **>70.5 - 97.5**
-1. Now we can "roll" a number across the entire weighted range (0 - 97.5). The likelihood of any teammate's range being hit is weighted by how much value they have received since they last paid. In this case, we'll say the random roll comes back **8.0**.
-1. Bob pays for coffee today, with every teammate getting their regular.
-1. Bob's weight is reset to 0 since he paid, he will definitely not be buying tomorrow.
-1. Everyone else's range is incremented by the value of their order; so Jim's weight is now **2** and all the other teammate's weights increase by **4.5**
+1. For simplicity, the rest of the team (Greg, Garg, Gorg, and Grog) all drink Mochas, which cost $4.50, respectively, they have gone 1, 3, 4, 5, and 6 days since they last paid, making their weights **4.5, 13.5, 18, 22.5, and 27**, respectively
+1. Everyone is ordering their "usual" today, so first thing, we increment everyone's weight by the value of their order:
+   1. Jim: **2**
+   1. Bob: **18**
+   1. Greg: **9**
+   1. Garg: **18**
+   1. Gorg: **27**
+   1. Grog: **31.5**
+1. The person with the highest weight pays for the order. In this case it's **Grog (31.5)**. Since he paid today, his weight is reset to 0. Everyone else's new weight is preserved and, if tomorrow everyone orders their usual again, it will be **Gorg's** turn to pay.
+1. In case of two teammate's weights being equal, one is selected randomly to pay and their weight is reset.
 
-Over time, people who order more expensive drinks should end up buying more frequently, but no one buys two consecutive days in a row. To solve the "who buys first" problem, we can arbitrarily set everyone's initial weight to 1 (or their favored drink value). Newcomers after the rotation starts
-can have their initial weight set to the **current average weight** so that they don't automatically get free drinks for an absurd length of time.
-
-#### Potential Issues
-
-The proposed solution is more like "coffee roulette" in that it's fair "over time" as purchases average out, but a run of bad luck may mean that someone ordering a cheap drink may end up paying every other day if the RNG deities frown upon them.
+Over time, Bob's weight grows much faster than everyone else's so he will pay more frequently. New teammates joining the rotation can have their weights start at 0, since we're incrementing weights _before_ deciding who pays for an order. Also teammates that don't join
+regularly will not have to pay as frequently since their weights do not increase as often.
 
 ### Implementation
 
