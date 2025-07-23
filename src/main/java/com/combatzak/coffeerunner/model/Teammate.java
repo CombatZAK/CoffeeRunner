@@ -1,9 +1,16 @@
 package com.combatzak.coffeerunner.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.Date;
 
 /**
  * Serializable object representing a team member
@@ -29,6 +36,8 @@ public class Teammate {
         return o1.getLastPurchase().compareTo(o2.getLastPurchase()) * -1;
     };
 
+    public static final DateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
 
     @JsonProperty("name")
     private String name;
@@ -43,24 +52,28 @@ public class Teammate {
     private double weight = 0.0;
 
     @JsonProperty("last_purchase")
-    private Date lastPurchase;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate lastPurchase;
 
     /**
      * Parameterized constructor setting all serializable values
      * @param name Teammate's name (must be unique)
      * @param regularOrder A DrinkOrder object representing teammates "default" order
      * @param isActive Set to true if this teammate should be part of a "default" coffee run
-     * @param lastPurchase Laste date the team member purchased drinks
+     * @param lastPurchase Last date the team member purchased drinks
      */
-    public Teammate(String name, DrinkOrder regularOrder, boolean isActive, Date lastPurchase) {
-        this.setName(name);
-        this.setRegularOrder(regularOrder);
-        this.setActive(isActive);
-        this.setLastPurchase(lastPurchase);
+    public Teammate(String name, DrinkOrder regularOrder, boolean isActive, double weight, LocalDate lastPurchase) {
+        this.name = name;
+        this.regularOrder = regularOrder;
+        this.isActive = isActive;
+        this.weight = weight;
+        this.lastPurchase = lastPurchase;
     }
 
     public Teammate() {
-        this(null, null, true, null);
+        this(null, null, true, 0.0, null);
     }
 
     /**
@@ -114,11 +127,11 @@ public class Teammate {
     /**
      * Last date the team member purchased drinks
      */
-    public Date getLastPurchase() {
+    public LocalDate getLastPurchase() {
         return lastPurchase;
     }
 
-    public void setLastPurchase(Date lastPurchase) {
+    public void setLastPurchase(LocalDate lastPurchase) {
         this.lastPurchase = lastPurchase;
     }
 }

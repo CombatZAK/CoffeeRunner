@@ -5,6 +5,7 @@ import com.combatzak.coffeerunner.model.Teammate;
 import com.combatzak.coffeerunner.util.DuplicateKeyException;
 import com.combatzak.coffeerunner.util.MissingKeyException;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
@@ -116,7 +117,7 @@ public abstract class BaseTeamController implements ITeamController {
         //reset buyer's purchase weight
         buyer.setWeight(0.0);
         // TODO quick and dirty - might need to change this to make testing easier
-        buyer.setLastPurchase(Calendar.getInstance().getTime());
+        buyer.setLastPurchase(LocalDate.now());
 
         return buyer;
     }

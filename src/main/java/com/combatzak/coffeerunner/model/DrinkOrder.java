@@ -14,7 +14,7 @@ public class DrinkOrder {
     private double price;
 
     /**
-     * Parameterized contructor initializes all serializable properties
+     * Parameterized constructor initializes all serializable properties
      *
      * @param name name of drink (ex, drip coffee)
      * @param drinkOptions additional options for drink (ex, sugar, half-and-half)
