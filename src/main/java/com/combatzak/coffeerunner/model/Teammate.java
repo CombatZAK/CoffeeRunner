@@ -36,9 +36,6 @@ public class Teammate {
         return o1.getLastPurchase().compareTo(o2.getLastPurchase()) * -1;
     };
 
-    public static final DateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-
     @JsonProperty("name")
     private String name;
 

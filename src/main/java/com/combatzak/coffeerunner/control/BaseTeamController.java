@@ -6,7 +6,6 @@ import com.combatzak.coffeerunner.util.DuplicateKeyException;
 import com.combatzak.coffeerunner.util.MissingKeyException;
 
 import java.time.LocalDate;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,10 +15,16 @@ import java.util.Map;
  * should buy the current round of drinks.
  */
 public abstract class BaseTeamController implements ITeamController {
+    public static class DateController {
+        public static LocalDate getNewDate() {
+            return LocalDate.now();
+        }
+    }
+
     /**
      * Deserialized team state to be updated based on the order
      */
-    private final Map<String, Teammate> team;
+    protected final Map<String, Teammate> team;
 
     /**
      * Handler used to pull team data from non-volatile storage and saved back to that same storage
@@ -130,7 +135,7 @@ public abstract class BaseTeamController implements ITeamController {
         //reset buyer's purchase weight
         buyer.setWeight(0.0);
         // TODO quick and dirty - might need to change this to make testing easier
-        buyer.setLastPurchase(LocalDate.now());
+        buyer.setLastPurchase(DateController.getNewDate());
 
         return buyer;
     }
