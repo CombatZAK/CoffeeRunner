@@ -26,7 +26,15 @@ public interface ITeamController {
      * @param orderList Drink orders for each teammate, mapped by unique name; these names MUST exist in the loaded team
      *                  context. Null drink orders imply using default drink; an empty or null map implies all ACTIVE
      *                  teammates are ordering their default drink.
+     * @return Teammate who will be buying drinks for this order.
      * @exception MissingKeyException Thrown when a name is specified in the orderList which is not found in the team
      */
     Teammate processOrder(Map<String, DrinkOrder> orderList) throws MissingKeyException;
+
+    /**
+     * Adds a new teammmate or updates an existing teammate (based on unique key - name)
+     *
+     * @param newTeammate new teammate information
+     */
+    void addOrUpdateTeammate(Teammate newTeammate);
 }

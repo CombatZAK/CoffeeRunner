@@ -62,6 +62,19 @@ public abstract class BaseTeamController implements ITeamController {
     @Override
     public abstract Teammate processOrder(Map<String, DrinkOrder> orderList) throws MissingKeyException;
 
+    @Override
+    public void addOrUpdateTeammate(Teammate newTeammate) {
+        if (newTeammate == null || newTeammate.getName() == null || newTeammate.getName().isBlank()) {
+            throw new IllegalArgumentException("Invalid teammate must be initialized with a non-empty name");
+        }
+
+        if (newTeammate.getRegularOrder() == null) {
+            throw new IllegalArgumentException("Invalid teammmate must have an initialized regular drink order");
+        }
+
+        this.team.put(newTeammate.getName(), newTeammate);
+    }
+
     /**
      * Checks whether the specified order is allowed under the rules
      *
