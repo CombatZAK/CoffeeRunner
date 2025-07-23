@@ -3,7 +3,9 @@ package com.combatzak.coffeerunner.control;
 import com.combatzak.coffeerunner.model.DrinkOrder;
 import com.combatzak.coffeerunner.model.Teammate;
 import com.combatzak.coffeerunner.util.DuplicateKeyException;
+import com.combatzak.coffeerunner.util.MissingKeyException;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +18,7 @@ public abstract class BaseTeamController implements ITeamController {
     /**
      * Deserialized team state to be updated based on the order
      */
-    private Map<String, Teammate> team;
+    private final Map<String, Teammate> team;
 
     /**
      * Handler used to pull team data from non-volatile storage and saved back to that same storage
@@ -34,9 +36,9 @@ public abstract class BaseTeamController implements ITeamController {
     }
 
     @Override
-    public void Load() throws DuplicateKeyException {
+    public void load() throws DuplicateKeyException {
         this.team.clear();
-        Collection<Teammate> teammates = this.teamStorageContext.FetchTeamMembers();
+        Collection<Teammate> teammates = this.teamStorageContext.fetchTeamMembers();
 
         for (Teammate teammate : teammates) {
             // We need to dedupe the list by name since names have to be unique.
@@ -52,17 +54,26 @@ public abstract class BaseTeamController implements ITeamController {
     }
 
     @Override
-    public void Save() {
-        this.teamStorageContext.SaveTeamMembers(this.team.values());
+    public void save() {
+        this.teamStorageContext.saveTeamMembers(this.team.values());
     }
 
     @Override
-    public abstract void ProcessOrder(Map<String, DrinkOrder> orderList);
+    public abstract Teammate processOrder(Map<String, DrinkOrder> orderList) throws MissingKeyException;
 
-    public void CheckOrderValid(Map<String, DrinkOrder> orderList) {
-        // null or empty collections are valid
-        if (orderList == null || orderList.isEmpty()) {
-            return;
+    /**
+     * Checks whether the specified order is allowed under the rules
+     *
+     * @param orderList Order containing participating team members and any order overrides
+     * @throws MissingKeyException Thrown if a teammate name is specified but not found in storage
+     */
+    public void checkOrderValid(Map<String, DrinkOrder> orderList) throws MissingKeyException {
+        // empty collections are valid, but we inject all active team members here
+        if (orderList.isEmpty()) {
+            for (Teammate teammate : this.team.values().stream().filter(Teammate::isActive).toList()) {
+                // TODO there is probably a better way to do this but this is too foreign to LINQ
+                orderList.put(teammate.getName(), teammate.getRegularOrder());
+            }
         }
 
         if (orderList.size() == 1)  {
@@ -71,11 +82,42 @@ public abstract class BaseTeamController implements ITeamController {
 
         for (Map.Entry<String, DrinkOrder> entry : orderList.entrySet()) {
             if (!this.team.containsKey(entry.getKey())) {
+                // TODO collection traversal is probably simpler than I'm making it
                 throw new MissingKeyException(
                         String.format("Team collection does not have a teammate named '%1s'", entry.getKey()),
                         entry.getKey(),
                         this.team);
             }
+
+            if (entry.getValue() == null) { //set all default orders as needed
+                entry.setValue(this.team.get(entry.getKey()).getRegularOrder());
+            }
         }
+    }
+
+    /**
+     * Updates all participating team members weights and selects the buyer of today's order
+     *
+     * @param orderList List of orders for today
+     * @return The buyer of today's order
+     */
+    public Teammate selectPayerForOrder(Map<String, DrinkOrder> orderList) {
+        for (Map.Entry<String, DrinkOrder> order : orderList.entrySet()) {
+            Teammate teammate = this.team.get(order.getKey());
+            teammate.incrementWeight(order.getValue().getPrice());
+        }
+
+        Teammate buyer = this.team.values().stream()
+                //get all the teammmates with their adjusted weights
+                .filter(t -> orderList.containsKey(t.getName()))
+                //order descending and pick the highest weight/oldest purchase
+                .max(Teammate.defaultComparer).orElseThrow();
+
+        //reset buyer's purchase weight
+        buyer.setWeight(0.0);
+        // TODO quick and dirty - might need to change this to make testing easier
+        buyer.setLastPurchase(Calendar.getInstance().getTime());
+
+        return buyer;
     }
 }

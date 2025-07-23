@@ -6,6 +6,6 @@ import java.util.Collection;
 
 public interface ITeamStorageContext {
 
-    Collection<Teammate> FetchTeamMembers();
-    void SaveTeamMembers(Collection<Teammate> team);
+    Collection<Teammate> fetchTeamMembers();
+    void saveTeamMembers(Collection<Teammate> team);
 }
