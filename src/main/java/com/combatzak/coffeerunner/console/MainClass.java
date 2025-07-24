@@ -148,7 +148,7 @@ ORDER: Produces an order and updates the team history to reflect it.
         teamController.save();
 
         String orderText = getOrderText(orderList, buyer);
-        System.out.println(orderText);
+        printOrder(orderText);
     }
 
     /**
@@ -247,5 +247,9 @@ ORDER: Produces an order and updates the team history to reflect it.
         builder.append(border);
 
         return builder.toString();
+    }
+
+    protected static void printOrder(String orderText) {
+        System.out.println(orderText);
     }
 }

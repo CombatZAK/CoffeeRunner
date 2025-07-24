@@ -5,6 +5,7 @@ import com.combatzak.coffeerunner.control.ITeamStorageContext;
 import com.combatzak.coffeerunner.model.DrinkOrder;
 import com.combatzak.coffeerunner.model.Teammate;
 import com.combatzak.coffeerunner.util.DuplicateKeyException;
+import com.combatzak.coffeerunner.util.MissingKeyException;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
@@ -197,7 +198,7 @@ public class MainClassTest {
     }
 
     @Test
-    public void testDoPut() throws DuplicateKeyException {
+    public void testDoPut_HappyPath() throws DuplicateKeyException {
         // FOR
         String teammateJson = "{}"; // not used for parsing
         ITeamStorageContext mockStorageContext = mock(ITeamStorageContext.class);
@@ -208,8 +209,9 @@ public class MainClassTest {
         try (MockedStatic<MainClass> staticController = mockStatic(MainClass.class)) {
             staticController.when(MainClass::getStorageContext).thenReturn(mockStorageContext);
             staticController.when(() -> MainClass.getTeamController(mockStorageContext)).thenReturn(mockTeamController);
-            staticController.when(() -> MainClass.doPut("{}")).thenCallRealMethod();
             staticController.when(() -> MainClass.parseTeammate("{}")).thenReturn(mockTeammate);
+
+            staticController.when(() -> MainClass.doPut("{}")).thenCallRealMethod();
 
             MainClass.doPut(teammateJson);
         }
@@ -217,6 +219,39 @@ public class MainClassTest {
         // THEN
         verify(mockTeamController).load();
         verify(mockTeamController).addOrUpdateTeammate(mockTeammate);
+        verify(mockTeamController).save();
+    }
+
+    @Test
+    public void testDoOrder_HappyPath() throws MissingKeyException, DuplicateKeyException {
+        // FOR
+        String orderJson = "{}"; //not used for parsing
+        String orderText = "*****\nAN ORDER RECEIPT\n*****";
+        ITeamStorageContext mockStorageContext = mock(ITeamStorageContext.class);
+        ITeamController mockTeamController = mock(ITeamController.class);
+        @SuppressWarnings("unchecked")
+        Map<String, DrinkOrder> mockOrder = mock(Map.class);
+        Teammate mockTeammate = mock(Teammate.class);
+
+        when(mockTeamController.processOrder(mockOrder)).thenReturn(mockTeammate);
+
+        // WHEN
+        try (MockedStatic<MainClass> staticController = mockStatic(MainClass.class)) {
+            staticController.when(MainClass::getStorageContext).thenReturn(mockStorageContext);
+            staticController.when(() -> MainClass.getTeamController(mockStorageContext)).thenReturn(mockTeamController);
+            staticController.when(() -> MainClass.parseOrderList("{}")).thenReturn(mockOrder);
+            staticController.when(() -> MainClass.getOrderText(mockOrder, mockTeammate)).thenReturn(orderText);
+
+            staticController.when(() -> MainClass.doOrder("{}")).thenCallRealMethod();
+
+            MainClass.doOrder(orderJson);
+
+            staticController.verify(() -> MainClass.printOrder(orderText));
+        }
+
+        // THEN
+        verify(mockTeamController).load();
+        verify(mockTeamController).processOrder(mockOrder);
         verify(mockTeamController).save();
     }
 }

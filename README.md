@@ -236,6 +236,54 @@ are the unique teammate names of the teammates participating in the order. The v
 }
 ```
 
+## Results
+
+I have created a simulation of the application and run it on a team of seven with arbitrary favored drink orders and prices
+and no variation.
+
+### Simulation
+
+Seven team members, **Jim, Bob, Dustin, Irinna, Adrian, Alex, and Luke** go to get coffee _every day_ for 10 years, from
+2000-01-01 through 2009-12-31; no one takes a break, and no one ever orders anything different. The drink orders are:
+
+| Name | Drink | Price |
+|------|:------|-------|
+| Jim | Coffee 16oz | $2.00 |
+| Bob | Cappuccino | $6.00 |
+| Dustin | Coffee 20oz; espresso shot | $4.75 |
+| Irinna | Americano | $5.60 |
+| Adrian | Double espresso | $5.25 |
+| Alex | Mocha | $4.00 |
+| Luke | Mocha | $4.00 |
+
+After running the simulation, I calculated the following:
+
+- How many days each teammate paid
+- How much money they spent on coffee
+- How many "free drinks" they received
+- The average daily spend
+
+### Result Data
+
+| Name   | Days Paid | Money Paid | Free Drink Value | Average Spend  |
+|--------|---------|------------|------------------|----------------|
+| Jim    | 243     | $7678.80   | $6820.00         | $2.10          |
+| Bob    | 610     | $19,276.00 | $18,258.00       | $5.28          |
+| Dustin | 608     | $19,212.00 | $14,463.75       | $5.26          |
+| Irinna | 609 | $19,244.40 | $17,046.40 | $5.27 |
+| Adrian | 609 | $19,244.40 | $15,981.00 | $5.27 |
+| Alex | 487 | $15,389.20 | $12,664.00 | $4.21 |
+| Luke | 487 | $15,389.20 | $12,664.00 | $4.21 |
+
+### Conclusions
+
+The algorithm is not perfect. It seems to _slightly_ favor teammates who select more expensive drinks. Bob and Irinna
+ended up paying less on their daily average than the cost of their drink, while Jim, Alex, and Luke paid more.
+
+Rather than resetting weights after paying, it may be worth considering reducing weight by the number of drinks paid for.
+Further testing and tuning maybe required. The algorithm _does_ ensure that teammates with less expensive drinks pay less
+frequently, however.
+
 ## Further Improvements
 
 This solution was developed quickly (~1 day worth of work), with expedience and simplicity being the driver for most design decisions. In terms of usability, the CLI solution is fraught with inconveniences, requiring the user to form JSON manually, though the "default" options minimize this. The
