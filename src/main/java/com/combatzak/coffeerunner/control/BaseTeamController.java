@@ -77,6 +77,13 @@ public abstract class BaseTeamController implements ITeamController {
             throw new IllegalArgumentException("Invalid teammmate must have an initialized regular drink order");
         }
 
+        if (this.team.containsKey(newTeammate.getName())) {
+            //we want to make sure that we don't edit the purchase date or weight when updating an existing teammate
+            Teammate oldTeammate = this.team.get(newTeammate.getName());
+            newTeammate.setWeight(oldTeammate.getWeight());;
+            newTeammate.setLastPurchase(oldTeammate.getLastPurchase());
+        }
+
         this.team.put(newTeammate.getName(), newTeammate);
     }
 

@@ -6,11 +6,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Serializable object representing a teammates drink order
  */
 public class DrinkOrder {
-    @JsonProperty("name")
+    @JsonProperty(value = "name", index = 0, required = true)
     private String name;
-    @JsonProperty("drink_options")
+    @JsonProperty(value = "drink_options", index = 1)
     private String drinkOptions;
-    @JsonProperty("price")
+    @JsonProperty(value = "price", index = 2, required = true)
     private double price;
 
     /**

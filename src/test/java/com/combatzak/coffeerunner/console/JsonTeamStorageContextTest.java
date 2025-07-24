@@ -68,7 +68,7 @@ public class JsonTeamStorageContextTest {
 
         // THEN
         String expected = """
-[{"active":true,"name":"Jim","regular_order":{"name":"Coffee 16oz","drink_options":null,"price":2.0},"is_active":true,"weight":2.0,"last_purchase":"2025-07-20"},{"active":true,"name":"Bob","regular_order":{"name":"Cappuccino","drink_options":"2% milk","price":6.0},"is_active":true,"weight":0.0,"last_purchase":"2025-07-21"}]""";
+[{"name":"Jim","regular_order":{"name":"Coffee 16oz","drink_options":null,"price":2.0},"is_active":true,"weight":2.0,"last_purchase":"2025-07-20"},{"name":"Bob","regular_order":{"name":"Cappuccino","drink_options":"2% milk","price":6.0},"is_active":true,"weight":0.0,"last_purchase":"2025-07-21"}]""";
         Assertions.assertEquals(expected, Files.readString(tempFile.toPath()));
 
     }

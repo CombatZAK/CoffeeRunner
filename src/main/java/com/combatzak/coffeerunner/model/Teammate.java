@@ -1,20 +1,20 @@
 package com.combatzak.coffeerunner.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Comparator;
 
 /**
  * Serializable object representing a team member
  */
+@JsonIgnoreProperties(value = "active")
 public class Teammate {
     public static final Comparator<Teammate> defaultComparer = (o1, o2) -> {
         int compareWeight = Double.compare(o1.getWeight(), o2.getWeight());
@@ -36,19 +36,19 @@ public class Teammate {
         return o1.getLastPurchase().compareTo(o2.getLastPurchase()) * -1;
     };
 
-    @JsonProperty("name")
+    @JsonProperty(value = "name", index = 0, required = true)
     private String name;
 
-    @JsonProperty("regular_order")
+    @JsonProperty(value = "regular_order", index = 1, required = true)
     private DrinkOrder regularOrder;
 
-    @JsonProperty("is_active")
+    @JsonProperty(value = "is_active", index = 2)
     private boolean isActive;
 
-    @JsonProperty("weight")
+    @JsonProperty(value = "weight", index = 3)
     private double weight = 0.0;
 
-    @JsonProperty("last_purchase")
+    @JsonProperty(value = "last_purchase", index = 4)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

@@ -62,6 +62,16 @@ I have assumed that the amount of data we're working with can be stored in memor
 
 CoffeeRunner is a Java project using Gradle to manage builds and tests. The following commands are used to build the project.
 
+### Requirements
+
+CoffeeRunner was developed in IntelliJ Idea and tested in a Windows 11 environment using OpenJDK.
+
+JRE-21 or later is required.
+
+### Tests
+
+Unit tests can be executed from repoistory root running `gradlew test`.
+
 ### Build/Package
 
 1. From repository root, run: `gradlew [clean] build jar`; this generates the executable jar file at `build/libs/`; current version is `CoffeeRunner-0.1.jar`.
@@ -229,5 +239,5 @@ are the unique teammate names of the teammates participating in the order. The v
 ## Further Improvements
 
 This solution was developed quickly (~1 day worth of work), with expedience and simplicity being the driver for most design decisions. In terms of usability, the CLI solution is fraught with inconveniences, requiring the user to form JSON manually, though the "default" options minimize this. The
-requirement to develop this solution as an application restricts what may be a more usable alternative -- a scripted spreadsheet or a Teams chatbot backed by LogicApps/PowerAutomate. The latter alternative is very promising, and prior experience tells me that a LogicApp chat-bot may be an ideally
-usable solution to this problem - albeit one that does not demonstrate any of my coding ability.
+requirement to develop this solution as an application restricts what may be a more usable alternative -- a scripted spreadsheet or a Teams chatbot backed by LogicApps/PowerAutomate -- and would be less work. The latter alternative is very promising, and prior experience tells me that a LogicApp
+chat-bot may be an ideally usable solution to this problem - albeit one that does not demonstrate any of my coding ability.
