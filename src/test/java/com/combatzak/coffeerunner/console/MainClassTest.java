@@ -4,15 +4,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TestMainClass {
+public class MainClassTest {
 
     @Test
     public void testInit_BlankFile() throws IOException {
