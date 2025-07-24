@@ -43,6 +43,14 @@ ORDER: Produces an order and updates the team history to reflect it.
   OPTS: None OR json array containing names of attendees and optionally overrides for their drink orders
 """;
 
+    protected static ITeamStorageContext getStorageContext() {
+        return new JsonTeamStorageContext(getTeamFile().getPath());
+    }
+
+    protected static ITeamController getTeamController(ITeamStorageContext storageContext) {
+        return new SimpleTeamController(storageContext);
+    }
+
     /**
      * Console entry point
      * Usage: java -jar coffeerunner.jar VERB OPTS
@@ -116,8 +124,8 @@ ORDER: Produces an order and updates the team history to reflect it.
     protected static void doPut(String json) throws DuplicateKeyException {
         Teammate putTeammate = parseTeammate(json);
 
-        ITeamStorageContext storageContext = new JsonTeamStorageContext(getTeamFile().getPath());
-        ITeamController teamController = new SimpleTeamController(storageContext);
+        ITeamStorageContext storageContext = getStorageContext();
+        ITeamController teamController =getTeamController(storageContext);
 
         teamController.load();
         teamController.addOrUpdateTeammate(putTeammate);
@@ -132,8 +140,8 @@ ORDER: Produces an order and updates the team history to reflect it.
     protected static void doOrder(String json) throws MissingKeyException, DuplicateKeyException {
         Map<String, DrinkOrder> orderList = parseOrderList(json);
 
-        ITeamStorageContext storageContext = new JsonTeamStorageContext(getTeamFile().getPath());
-        ITeamController teamController = new SimpleTeamController(storageContext);
+        ITeamStorageContext storageContext = getStorageContext();
+        ITeamController teamController = getTeamController(storageContext);
 
         teamController.load();
         Teammate buyer = teamController.processOrder(orderList);
@@ -153,8 +161,8 @@ ORDER: Produces an order and updates the team history to reflect it.
         try {
             mapper.readValue(json, new TypeReference<List<Teammate>>() {});
         }
-        catch (JsonProcessingException e) {
-            return false;
+        catch (IllegalArgumentException | JsonProcessingException e) {
+             return false;
         }
 
         return true;
@@ -191,7 +199,7 @@ ORDER: Produces an order and updates the team history to reflect it.
     }
 
     protected static File getTeamFile() {
-        //some hackiness to get the abolute jar path
+        //some hackiness to get the absolute jar path
         String jarPath;
         try {
             jarPath = MainClass.class
