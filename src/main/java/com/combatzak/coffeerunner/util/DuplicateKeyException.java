@@ -19,7 +19,7 @@ public class DuplicateKeyException extends Exception {
      *
      * @param message Human readable message describing error
      * @param collectionName name of collection violating constraint
-     * @param collection refernece to collection violating constraint
+     * @param collection reference to collection violating constraint
      */
     public DuplicateKeyException(String message, String collectionName, Object collection) {
         super(message);
