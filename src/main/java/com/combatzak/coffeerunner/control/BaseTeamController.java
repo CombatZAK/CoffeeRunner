@@ -65,7 +65,16 @@ public abstract class BaseTeamController implements ITeamController {
     }
 
     @Override
-    public abstract Teammate processOrder(Map<String, DrinkOrder> orderList) throws MissingKeyException;
+    public Teammate processOrder(Map<String, DrinkOrder> orderList) throws MissingKeyException {
+        if (orderList == null) {
+            orderList = new HashMap<>();
+        }
+
+        // Checks that the order is valid and gets it ready for processing if so
+        checkOrderValid(orderList);
+
+        return selectPayerForOrder(orderList);
+    }
 
     @Override
     public void addOrUpdateTeammate(Teammate newTeammate) {
@@ -80,7 +89,7 @@ public abstract class BaseTeamController implements ITeamController {
         if (this.team.containsKey(newTeammate.getName())) {
             //we want to make sure that we don't edit the purchase date or weight when updating an existing teammate
             Teammate oldTeammate = this.team.get(newTeammate.getName());
-            newTeammate.setWeight(oldTeammate.getWeight());;
+            newTeammate.setTotalDrinkCost(oldTeammate.getTotalDrinkCost());;
             newTeammate.setLastPurchase(oldTeammate.getLastPurchase());
         }
 
@@ -130,7 +139,7 @@ public abstract class BaseTeamController implements ITeamController {
     public Teammate selectPayerForOrder(Map<String, DrinkOrder> orderList) {
         for (Map.Entry<String, DrinkOrder> order : orderList.entrySet()) {
             Teammate teammate = this.team.get(order.getKey());
-            teammate.incrementWeight(order.getValue().getPrice());
+            teammate.incrementTotalCost(order.getValue().getPrice());
         }
 
         Teammate buyer = this.team.values().stream()
@@ -140,7 +149,7 @@ public abstract class BaseTeamController implements ITeamController {
                 .max(Teammate.defaultComparer).orElseThrow();
 
         //reset buyer's purchase weight
-        buyer.setWeight(0.0);
+        buyer.setTotalDrinkCost(0.0);
         // TODO quick and dirty - might need to change this to make testing easier
         buyer.setLastPurchase(DateController.getNewDate());
 

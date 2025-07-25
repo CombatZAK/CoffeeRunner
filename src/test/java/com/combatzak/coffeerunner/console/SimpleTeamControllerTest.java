@@ -105,13 +105,13 @@ public class SimpleTeamControllerTest {
         // THEN
         assertEquals("Bob", result.getName());
         assertEquals(today, result.getLastPurchase());
-        assertEquals(0.0, result.getWeight());
+        assertEquals(0.0, result.getTotalDrinkCost());
 
         assertEquals(2, testOrderList.size());
         assertEquals("Coffee 16oz", testOrderList.get("Jim").getName());
         assertEquals("Cappuccino", testOrderList.get("Bob").getName());
 
-        assertEquals(4.0, controller.getTeam().get("Jim").getWeight());
+        assertEquals(4.0, controller.getTeam().get("Jim").getTotalDrinkCost());
     }
 
     @Test
@@ -134,13 +134,13 @@ public class SimpleTeamControllerTest {
         // THEN
         assertEquals("Jim", result.getName());
         assertEquals(today, result.getLastPurchase());
-        assertEquals(0.0, result.getWeight());
+        assertEquals(0.0, result.getTotalDrinkCost());
 
         assertEquals(2, testOrderList.size());
         assertEquals("Mocha", testOrderList.get("Jim").getName());
         assertEquals("Cappuccino", testOrderList.get("Bob").getName());
 
-        assertEquals(6.0, controller.getTeam().get("Bob").getWeight());
+        assertEquals(6.0, controller.getTeam().get("Bob").getTotalDrinkCost());
     }
 
     @Test
@@ -170,14 +170,14 @@ public class SimpleTeamControllerTest {
         // THEN
         assertEquals("Greg", result.getName());
         assertEquals(today, result.getLastPurchase());
-        assertEquals(0.0, result.getWeight());
+        assertEquals(0.0, result.getTotalDrinkCost());
 
         assertEquals(2, testOrderList.size());
         assertEquals("Coffee 16oz", testOrderList.get("Jim").getName());
         assertEquals("Mocha", testOrderList.get("Greg").getName());
 
-        assertEquals(6.0, controller.getTeam().get("Jim").getWeight());
-        assertEquals(0.0, controller.getTeam().get("Bob").getWeight());
+        assertEquals(6.0, controller.getTeam().get("Jim").getTotalDrinkCost());
+        assertEquals(0.0, controller.getTeam().get("Bob").getTotalDrinkCost());
     }
 
     @Test

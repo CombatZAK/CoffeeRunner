@@ -16,16 +16,4 @@ public class SimpleTeamController extends BaseTeamController {
     public SimpleTeamController(ITeamStorageContext teamStorageContext) {
         super(teamStorageContext);
     }
-
-    @Override
-    public Teammate processOrder(Map<String, DrinkOrder> orderList) throws MissingKeyException {
-        if (orderList == null) {
-            orderList = new HashMap<>();
-        }
-
-        // Checks that the order is valid and gets it ready for processing if so
-        checkOrderValid(orderList);
-
-        return selectPayerForOrder(orderList);
-    }
 }

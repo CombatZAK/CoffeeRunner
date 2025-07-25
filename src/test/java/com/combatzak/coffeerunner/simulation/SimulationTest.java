@@ -1,9 +1,9 @@
 package com.combatzak.coffeerunner.simulation;
 
-import com.combatzak.coffeerunner.console.SimpleTeamController;
 import com.combatzak.coffeerunner.control.BaseTeamController;
 import com.combatzak.coffeerunner.control.ITeamController;
 import com.combatzak.coffeerunner.control.ITeamStorageContext;
+import com.combatzak.coffeerunner.control.RollingAverageTeamController;
 import com.combatzak.coffeerunner.model.DrinkOrder;
 import com.combatzak.coffeerunner.model.Teammate;
 import com.combatzak.coffeerunner.util.DuplicateKeyException;
@@ -52,8 +52,8 @@ public class SimulationTest {
                 null
         ));
 
-        testTeam.put("Irinna", new Teammate(
-                "Irinna",
+        testTeam.put("Irina", new Teammate(
+                "Irina",
                 new DrinkOrder("Americano", "2 sugar", 5.60),
                 true,
                 0.0,
@@ -85,7 +85,7 @@ public class SimulationTest {
         ));
 
         ITeamStorageContext mockStorageContext = mock(ITeamStorageContext.class);
-        ITeamController teamController = new SimpleTeamController(mockStorageContext);
+        ITeamController teamController = new RollingAverageTeamController(mockStorageContext);
 
         LocalDate runningDate = LocalDate.parse("2000-01-01");
         long iteration = 0;

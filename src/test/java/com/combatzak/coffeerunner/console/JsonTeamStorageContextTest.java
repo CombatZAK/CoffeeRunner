@@ -7,8 +7,6 @@ import org.junit.jupiter.api.*;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -44,7 +42,7 @@ public class JsonTeamStorageContextTest {
         Assertions.assertEquals(testCollection.getFirst().getRegularOrder().getDrinkOptions(), resultList.getFirst().getRegularOrder().getDrinkOptions());
         Assertions.assertEquals(testCollection.getFirst().getRegularOrder().getPrice(), resultList.getFirst().getRegularOrder().getPrice());
         Assertions.assertEquals(testCollection.getFirst().isActive(), resultList.getFirst().isActive());
-        Assertions.assertEquals(testCollection.getFirst().getWeight(), resultList.getFirst().getWeight());
+        Assertions.assertEquals(testCollection.getFirst().getTotalDrinkCost(), resultList.getFirst().getTotalDrinkCost());
         Assertions.assertEquals(testCollection.getFirst().getLastPurchase(), resultList.getFirst().getLastPurchase());
 
         Assertions.assertEquals(testCollection.getLast().getName(), resultList.getLast().getName());
@@ -52,7 +50,7 @@ public class JsonTeamStorageContextTest {
         Assertions.assertEquals(testCollection.getLast().getRegularOrder().getDrinkOptions(), resultList.getLast().getRegularOrder().getDrinkOptions());
         Assertions.assertEquals(testCollection.getLast().getRegularOrder().getPrice(), resultList.getLast().getRegularOrder().getPrice());
         Assertions.assertEquals(testCollection.getLast().isActive(), resultList.getLast().isActive());
-        Assertions.assertEquals(testCollection.getLast().getWeight(), resultList.getLast().getWeight());
+        Assertions.assertEquals(testCollection.getLast().getTotalDrinkCost(), resultList.getLast().getTotalDrinkCost());
         Assertions.assertEquals(testCollection.getLast().getLastPurchase(), resultList.getLast().getLastPurchase());
     }
 
