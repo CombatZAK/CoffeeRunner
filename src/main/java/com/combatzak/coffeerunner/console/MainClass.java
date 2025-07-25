@@ -2,6 +2,7 @@ package com.combatzak.coffeerunner.console;
 
 import com.combatzak.coffeerunner.control.ITeamController;
 import com.combatzak.coffeerunner.control.ITeamStorageContext;
+import com.combatzak.coffeerunner.control.RollingAverageTeamController;
 import com.combatzak.coffeerunner.model.DrinkOrder;
 import com.combatzak.coffeerunner.model.Teammate;
 import com.combatzak.coffeerunner.util.DuplicateKeyException;
@@ -48,7 +49,7 @@ ORDER: Produces an order and updates the team history to reflect it.
     }
 
     protected static ITeamController getTeamController(ITeamStorageContext storageContext) {
-        return new SimpleTeamController(storageContext);
+        return new RollingAverageTeamController(storageContext);
     }
 
     /**

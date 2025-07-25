@@ -37,7 +37,13 @@ public class Teammate {
     };
 
     public static final Comparator<Teammate> rollingAverageComparaer = (o1, o2) -> {
-        return Double.compare(o1.getSpendCostRatio(), o2.getSpendCostRatio());
+        if (o1.getSpendCostRatio() == 0.0) {
+            return (o2.getSpendCostRatio() == 0.0) ? 0 : -1;
+        }
+        if (o2.getSpendCostRatio() == 0.0) {
+            return (o1.getSpendCostRatio() == 0.0) ? 0 : 1;
+        }
+        return  Double.compare(o1.getSpendCostRatio(), o2.getSpendCostRatio());
     };
 
     @JsonProperty(value = "name", index = 0, required = true)
@@ -74,16 +80,15 @@ public class Teammate {
      * @param isActive Set to true if this teammate should be part of a "default" coffee run
      * @param lastPurchase Last date the team member purchased drinks
      */
-    public Teammate(String name, DrinkOrder regularOrder, boolean isActive, double weight, LocalDate lastPurchase) {
+    public Teammate(String name, DrinkOrder regularOrder, boolean isActive, LocalDate lastPurchase) {
         this.name = name;
         this.regularOrder = regularOrder;
         this.isActive = isActive;
-        this.totalDrinkCost = weight;
         this.lastPurchase = lastPurchase;
     }
 
     public Teammate() {
-        this(null, null, true, 0.0, null);
+        this(null, null, true, null);
     }
 
     /**

@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 public class SimulationTest {
     protected static class UserRecord {
         public int daysPaid = 0;
+        public int daysParticipated = 0;
         public double moneyPaid = 0.0;
         public double received = 0.0;
     }
@@ -32,7 +33,6 @@ public class SimulationTest {
                 "Jim",
                 new DrinkOrder("Coffee 16oz", null, 2.0),
                 true,
-                0.0,
                 null
         ));
 
@@ -40,7 +40,6 @@ public class SimulationTest {
                 "Bob",
                 new DrinkOrder("Cappuccino", "2% milk", 6.0),
                 true,
-                0.0,
                 null
         ));
 
@@ -48,7 +47,6 @@ public class SimulationTest {
                 "Dustin",
                 new DrinkOrder("Coffee 20oz", "Espresso shot", 4.75),
                 true,
-                0.0,
                 null
         ));
 
@@ -56,7 +54,6 @@ public class SimulationTest {
                 "Irina",
                 new DrinkOrder("Americano", "2 sugar", 5.60),
                 true,
-                0.0,
                 null
         ));
 
@@ -64,7 +61,6 @@ public class SimulationTest {
                 "Adrian",
                 new DrinkOrder("Double espresso", null, 5.25),
                 true,
-                0.0,
                 null
         ));
 
@@ -72,7 +68,6 @@ public class SimulationTest {
                 "Alex",
                 new DrinkOrder("Mocha", null, 4.0),
                 true,
-                0.0,
                 null
         ));
 
@@ -80,7 +75,6 @@ public class SimulationTest {
                 "Luke",
                 new DrinkOrder("Mocha", null, 4.0),
                 true,
-                0.0,
                 null
         ));
 
@@ -108,12 +102,28 @@ public class SimulationTest {
             staticController.when(BaseTeamController.DateController::getNewDate).thenReturn(runningDate.plusDays(iteration));
 
             for (; iteration < 3653; iteration++) {
+                if (iteration == 1826) {
+                    testTeam.put("Zach", new Teammate(
+                            "Zach",
+                            new DrinkOrder("Nitro cold brew", "vanilla cream", 6.95),
+                            true,
+                            null
+                    ));
+
+                    teamController.addOrUpdateTeammate(testTeam.get("Zach"));
+
+                    resultData.put("Zach", new UserRecord());
+                    orderList.put("Zach", testTeam.get("Zach").getRegularOrder());
+                    orderTotal += 6.95;
+                }
+
                 Teammate payer = teamController.processOrder(orderList);
 
                 resultData.get(payer.getName()).daysPaid++;
                 resultData.get(payer.getName()).moneyPaid += orderTotal;
 
                 for (Teammate teammate : testTeam.values()) {
+                    resultData.get(teammate.getName()).daysParticipated++;
                     if (teammate == payer) {
                         continue;
                     }
@@ -129,7 +139,7 @@ public class SimulationTest {
             System.out.printf("MONEY PAID: %1.2f\n", entry.getValue().moneyPaid);
             System.out.printf("VALUE RECEIVED: %1.2f\n", entry.getValue().received);
 
-            double averageCost = entry.getValue().moneyPaid / (double)3653;
+            double averageCost = entry.getValue().moneyPaid / (double)entry.getValue().daysParticipated;
             System.out.printf("AVG PAID: %1.2f\n\n", averageCost);
         }
     }

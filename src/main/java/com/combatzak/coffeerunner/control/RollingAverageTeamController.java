@@ -12,6 +12,11 @@ public class RollingAverageTeamController extends BaseTeamController {
     }
 
     @Override
+    public void addOrUpdateTeammate(Teammate newTeammate) {
+        super.addOrUpdateTeammate(newTeammate);
+    }
+
+    @Override
     public Teammate selectPayerForOrder(Map<String, DrinkOrder> orderList) {
         Teammate buyer = this.team.values().stream().filter(t -> orderList.containsKey(t.getName()))
                 .min(Teammate.rollingAverageComparaer).orElseThrow();

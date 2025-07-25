@@ -17,8 +17,8 @@ public class JsonTeamStorageContextTest {
     @BeforeAll
     public static void setUp() {
         testCollection = new ArrayList<>();
-        testCollection.add(new Teammate("Jim", new DrinkOrder("Coffee 16oz", null, 2.0), true, 2.0, LocalDate.parse("2025-07-20")));
-        testCollection.add(new Teammate("Bob", new DrinkOrder("Cappuccino", "2% milk", 6.0), true, 0.0, LocalDate.parse("2025-07-21")));
+        testCollection.add(new Teammate("Jim", new DrinkOrder("Coffee 16oz", null, 2.0), true, LocalDate.parse("2025-07-20")));
+        testCollection.add(new Teammate("Bob", new DrinkOrder("Cappuccino", "2% milk", 6.0), true, LocalDate.parse("2025-07-21")));
     }
 
     @Test
