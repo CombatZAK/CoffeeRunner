@@ -28,7 +28,7 @@ Here are the understood constraints and assumptions:
 
 A "weighted round-robin" solution is should be adequate so resolve the fairness concern. For time constraints, a CLI solution will be implemented first, but will be left extensible so that an API can be implemented later.z
 
-### The Decision Algorithm
+### First Attempt - Weighted Round-Robin
 
 In the following example, if Joe's daily drink (a black coffee) costs $2 and Bob's drink (a cappuccino) costs $6, it is most "fair" if Bob pays for drinks roughly 3 times as frequently as Jim. The algorithm should also account for how long a teammate has gone since they last paid for drinks, or,
 more precisely, how much coffee-value have they received since they last paid. A weighted-round robin algorithm accounts for this. Consider the following example:
@@ -50,8 +50,101 @@ more precisely, how much coffee-value have they received since they last paid. A
 1. In case of two teammate's weights being equal, the one who went the longest duration without purchasing will be selected.
    1. there is an edge case when the team is first initialized where last-purchase date and weights are equal. In this event, a teammate will be chosen arbitrarily (whoever appears first in the sort).
 
+#### Results
+
+I have created a simulation of the application and run it on a team of seven with arbitrary favored drink orders and prices
+and no variation.
+
+##### Simulation
+
+Seven team members, **Jim, Bob, Dustin, Irina, Adrian, Alex, and Luke** go to get coffee _every day_ for 10 years, from
+2000-01-01 through 2009-12-31; no one takes a break, and no one ever orders anything different. The drink orders are:
+
+| Name | Drink | Price |
+|------|:------|-------|
+| Jim | Coffee 16oz | $2.00 |
+| Bob | Cappuccino | $6.00 |
+| Dustin | Coffee 20oz; espresso shot | $4.75 |
+| Irina | Americano | $5.60 |
+| Adrian | Double espresso | $5.25 |
+| Alex | Mocha | $4.00 |
+| Luke | Mocha | $4.00 |
+
+After running the simulation, I calculated the following:
+
+- How many days each teammate paid
+- How much money they spent on coffee
+- How many "free drinks" they received
+- The average daily spend
+
+##### Simulation Data
+
+| Name  | Days Paid | Money Paid | Free Drink Value | Average Spend  |
+|-------|---------|------------|------------------|----------------|
+| Jim   | 243     | $7678.80   | $6820.00         | $2.10          |
+| Bob   | 610     | $19,276.00 | $18,258.00       | $5.28          |
+| Dustin | 608     | $19,212.00 | $14,463.75       | $5.26          |
+| Irina | 609 | $19,244.40 | $17,046.40 | $5.27 |
+| Adrian | 609 | $19,244.40 | $15,981.00 | $5.27 |
+| Alex | 487 | $15,389.20 | $12,664.00 | $4.21 |
+| Luke | 487 | $15,389.20 | $12,664.00 | $4.21 |
+
+#### Findings
+
+The algorithm is not perfect. It seems to _slightly_ favor teammates who select more expensive drinks. Bob and Irinna
+ended up paying less on their daily average than the cost of their drink, while Jim, Alex, and Luke paid more.
+
+Rather than resetting weights after paying, it may be worth considering reducing weight by the number of drinks paid for.
+Further testing and tuning maybe required. The algorithm _does_ ensure that teammates with less expensive drinks pay less
+frequently, however.
+
 Over time, Bob's weight grows faster than everyone else's so he will pay more frequently. New teammates joining the rotation can have their weights start at 0, since we're incrementing weights _before_ deciding who pays for an order. Also teammates that don't join
 regularly will not have to pay as frequently since their weights do not increase as often.
+
+### Second Attempt - Rolling Average
+
+The first iteration had the correct goal, the payer who received the most value of "free drinks" should be the one who paid
+next. However, this was not completely fair over time. Fairness should be determined by the average amount a teammate pays
+being as close as possible to the average value of the drinks they order. Rather than playing with correlated, imprecise
+metrics, I decided to track this specific value and see if it yielded better results.
+
+#### Simulation
+
+As before, I used a team of 7 members who all order the same drink every day and never skip a day. To add some more complexity
+though, I included a new teammate **Zach** who joins the team roughly halfway through the simulation. At the same time **Bob**
+decides to start ordering Large cappuccinos, which are a bit more expensive.
+
+| Name                 | Drink | Price                         |
+|----------------------|:------|-------------------------------|
+| Jim                  | Coffee 16oz | $2.00                         |
+| Bob                  | Cappuccino | $6.00 (\$8.00 after day 1826) |
+| Dustin               | Coffee 20oz; espresso shot | $4.75                         |
+| Irina                | Americano | $5.60                         |
+| Adrian               | Double espresso | $5.25                         |
+| Alex                 | Mocha | $4.00                         |
+| Luke                 | Mocha | $4.00                         |
+| Zach (After day 1826) | Nitro cold brew; vanilla cream | $6.95                         |
+
+##### Simulation Data
+
+| Name   | Days Paid | Money Paid | Average Spend |
+|--------|-----------|------------|---------------|
+| Jim    | 206       | $7315.10   | $2.00         |
+| Bob    | 707       | $25,563.20 | $7.00         |
+| Dustin | 488       | $17,336.10 | $4.75         |
+| Irina  | 576       | $20,457.00 | $5.60         |
+| Adrian | 540       | $19,185.15 | $5.25         |
+| Alex   | 412       | $14,639.15 | $4.01         |
+| Luke   | 411       | $14,598.60 | $4.00         |
+| Zach   | 313       | $12,692.15 | $6.95         |
+
+#### Findings
+
+These numbers are near-perfect. Any deviations from the "correct" average price are effectively rounding errors. The solution
+correctly accounts for newly added teammates with fewer days participating, and deviations in standard order (Bob's change
+in drink price halfway through resulted in an average of the two prices).
+
+This solution will be merged in to the main branch for release.
 
 ### Implementation
 
@@ -74,7 +167,7 @@ Unit tests can be executed from repoistory root running `gradlew test`.
 
 ### Build/Package
 
-1. From repository root, run: `gradlew [clean] build jar`; this generates the executable jar file at `build/libs/`; current version is `CoffeeRunner-0.1.jar`.
+1. From repository root, run: `gradlew [clean] build jar`; this generates the executable jar file at `build/libs/`; current version is `CoffeeRunner-0.2.jar`.
 1. Optionally, you can move this file to a directory of your choice for execution; an installer is currently not provided and there are no configuration settings due to the simplicity of the application.
 
 ### Execution
@@ -83,7 +176,7 @@ The team data is stored in a single JSON file in the same directory as the JAR f
 shown here:
 
 ```
-java -jar CoffeeRunner-0.1.jar INIT [JSON_ARRAY]
+java -jar CoffeeRunner-0.2.jar INIT [JSON_ARRAY]
 ```
 
 Where `JSON_ARRAY` is an optional argument that uses the same [team schema](#team-schema). Following intitialization, you can add or modify teammates, or start running the ordering operation.
@@ -96,7 +189,7 @@ constructing this argument.
 Example:
 
 ```
-java -jar CoffeeRunner-0.1.jar PUT '{"name": "Jim", "regular_order": { "name": "Coffee 16oz", "drink_options": "half and half", "price": 2.0 }, "is_active": true }'
+java -jar CoffeeRunner-0.2.jar PUT '{"name": "Jim", "regular_order": { "name": "Coffee 16oz", "drink_options": "half and half", "price": 2.0 }, "is_active": true }'
 ```
 
 This command will add a new teammate, `Jim` to the team, or modify the fields of the entry with that name if it already exists.
@@ -111,20 +204,20 @@ Examples:
 The following command issues an order for all **active** teammmates using their regular drink orders and updates the `teams.json` file.
 
 ```
-java -jar CoffeeRunner-0.1.jar ORDER
+java -jar CoffeeRunner-0.2.jar ORDER
 ```
 
 The following command issues an order **only** for teammates **Jim**, **Bob**, and **Greg** and updates their entries in `teams.json` accordingly; no other teammates are modified. These teammates **must** exist prior to running this command. Note that null values indicate these teammates
 are receiving their regular drink orders.
 
 ```
-java -jar CoffeeRunner-0.1.jar ORDER '{"Jim": null, "Bob": null, "Greg": null}'
+java -jar CoffeeRunner-0.2.jar ORDER '{"Jim": null, "Bob": null, "Greg": null}'
 ```
 
 The following command issues an order for teammates **Jim**, **Bob** and **Greg** as above, but overrides **Jim**'s order with custom drink.
 
 ```
-java -jar CoffeeRunner-0.1.jar ORDER '{"Jim": {"name": "Mocha", "drink_options": null, "price": 4.5}, "Bob": null, "Greg": null}'
+java -jar CoffeeRunner-0.2.jar ORDER '{"Jim": {"name": "Mocha", "drink_options": null, "price": 4.5}, "Bob": null, "Greg": null}'
 ```
 
 ## Argument Schema
@@ -149,7 +242,10 @@ This JSON block shows a team with two teammates.
          "price": 2.0
       },
       "is_active": true,
-      "weight": 2.0,
+      "total_drink_cost": 8.0,
+      "days_participated": 4,
+      "days_paid": 1,
+      "total_paid": 8.0,
       "last_purchase": "2025-07-20"
    },
    {
@@ -160,7 +256,10 @@ This JSON block shows a team with two teammates.
          "price": 6.0
       },
       "is_active": true,
-      "weight": 0.0,
+      "total_drink_cost":  24.0,
+      "days_participated": 4,
+      "days_paid": 3,
+      "total_paid": 24.0,
       "last_purchase": "2025-07-21"
    }
 ]
@@ -173,12 +272,15 @@ This JSON block shows a team with two teammates.
 
 A **teammate** is a **JSON object** tracking the state of an individual teammate. This object is stored in the team array (see [team schema](#team-schema)), and is also used to add or update teammates with the **PUT** command. A description of each field of this object follows:
 
-| Field | Type | Required | Used in PUT | Description |
-|-------|------|----------|-------------|:------------|
-| **name** | String | **YES** | **YES** | Unique identifier for teammate |
+| Field             | Type | Required | Used in PUT | Description |
+|-------------------|------|----------|-------------|:------------|
+| **name**          | String | **YES** | **YES** | Unique identifier for teammate |
 | **regular_order** | [drinkOrder](#drinkorder-schema) | **YES** | **YES** | Teammate's "default" drink order |
-| **is_active** | boolean | **NO** | **NO** | True if the teammate is part of the "default" order list (default `true`) |
-| **weight** | Number | **NO** | **NO** | The running sum of drink the teammate has received for "free" since they last paid (default 0) |
+| **is_active**     | boolean | **NO** | **NO** | True if the teammate is part of the "default" order list (default `true`) |
+| **total_drink_cost** | Number | **NO** | **NO** | The total cost of drinks this teammate has ordered |
+| **days_participated** | Number | **NO** | **NO** | The number of days the teammate has participated in coffee |
+| **days_paid** | Number | **NO** | **NO** | **NO** | The number of days the teammate has paid for coffee |
+| **total_paid** | Number | **NO** | **NO** | The total amount this teammate has paid for drinks |
 | **last_purchase** | String | **NO** | **NO** | The date of the teammate's last turn purchasing coffee in the format `yyyy-MM-dd` | 
 
 #### Teammate Example
@@ -192,8 +294,12 @@ A **teammate** is a **JSON object** tracking the state of an individual teammate
       "price": 4.5
    },
    "is_active": true,
-   "weight": 13.5,
-   "last_purchase": "2025-07-19"
+   "total_drink_cost": 30.75,
+   "days_participated": 7,
+   "days_paid": 2,
+   "total_paid": 14.55
+   "last_purchase": "2025-07-19",
+   ""
 }
 ```
 
@@ -236,53 +342,13 @@ are the unique teammate names of the teammates participating in the order. The v
 }
 ```
 
-## Results
+## Learnings
 
-I have created a simulation of the application and run it on a team of seven with arbitrary favored drink orders and prices
-and no variation.
-
-### Simulation
-
-Seven team members, **Jim, Bob, Dustin, Irinna, Adrian, Alex, and Luke** go to get coffee _every day_ for 10 years, from
-2000-01-01 through 2009-12-31; no one takes a break, and no one ever orders anything different. The drink orders are:
-
-| Name | Drink | Price |
-|------|:------|-------|
-| Jim | Coffee 16oz | $2.00 |
-| Bob | Cappuccino | $6.00 |
-| Dustin | Coffee 20oz; espresso shot | $4.75 |
-| Irinna | Americano | $5.60 |
-| Adrian | Double espresso | $5.25 |
-| Alex | Mocha | $4.00 |
-| Luke | Mocha | $4.00 |
-
-After running the simulation, I calculated the following:
-
-- How many days each teammate paid
-- How much money they spent on coffee
-- How many "free drinks" they received
-- The average daily spend
-
-### Result Data
-
-| Name   | Days Paid | Money Paid | Free Drink Value | Average Spend  |
-|--------|---------|------------|------------------|----------------|
-| Jim    | 243     | $7678.80   | $6820.00         | $2.10          |
-| Bob    | 610     | $19,276.00 | $18,258.00       | $5.28          |
-| Dustin | 608     | $19,212.00 | $14,463.75       | $5.26          |
-| Irinna | 609 | $19,244.40 | $17,046.40 | $5.27 |
-| Adrian | 609 | $19,244.40 | $15,981.00 | $5.27 |
-| Alex | 487 | $15,389.20 | $12,664.00 | $4.21 |
-| Luke | 487 | $15,389.20 | $12,664.00 | $4.21 |
-
-### Conclusions
-
-The algorithm is not perfect. It seems to _slightly_ favor teammates who select more expensive drinks. Bob and Irinna
-ended up paying less on their daily average than the cost of their drink, while Jim, Alex, and Luke paid more.
-
-Rather than resetting weights after paying, it may be worth considering reducing weight by the number of drinks paid for.
-Further testing and tuning maybe required. The algorithm _does_ ensure that teammates with less expensive drinks pay less
-frequently, however.
+The solution to this challenge would have been far simpler without added requirements. The ability to support new teammates
+joining the team, flexible participation, or deviations from usual drink orders were not part of the original requirements.
+These features were added for [!!FUN!!](https://dwarffortresswiki.org/index.php/DF2014:Losing) prior to having a prototype
+working. In retrospect, I think solving the original problem without added complexity, and then adding that complexity later
+would have been a better choice.
 
 ## Further Improvements
 

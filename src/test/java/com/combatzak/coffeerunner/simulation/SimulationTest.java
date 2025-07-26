@@ -110,11 +110,14 @@ public class SimulationTest {
                             null
                     ));
 
+                    testTeam.get("Bob").getRegularOrder().setDrinkOptions("large, extra shot");
+                    testTeam.get("Bob").getRegularOrder().setPrice(8.00);
+
                     teamController.addOrUpdateTeammate(testTeam.get("Zach"));
 
                     resultData.put("Zach", new UserRecord());
-                    orderList.put("Zach", testTeam.get("Zach").getRegularOrder());
-                    orderTotal += 6.95;
+                    orderList = new HashMap<>();
+                    orderTotal += 7.95;
                 }
 
                 Teammate payer = teamController.processOrder(orderList);
@@ -135,11 +138,10 @@ public class SimulationTest {
 
         for (Map.Entry<String, UserRecord> entry : resultData.entrySet()) {
             System.out.printf("NAME: %1s\n", entry.getKey());
-            System.out.printf("DAYS PAID: %1s\n", entry.getValue().daysPaid);
-            System.out.printf("MONEY PAID: %1.2f\n", entry.getValue().moneyPaid);
-            System.out.printf("VALUE RECEIVED: %1.2f\n", entry.getValue().received);
+            System.out.printf("DAYS PAID: %1s\n", testTeam.get(entry.getKey()).getDaysPaid());
+            System.out.printf("MONEY PAID: %1.2f\n", testTeam.get(entry.getKey()).getTotalPaid());
 
-            double averageCost = entry.getValue().moneyPaid / (double)entry.getValue().daysParticipated;
+            double averageCost = testTeam.get(entry.getKey()).getTotalPaid() / (double)testTeam.get(entry.getKey()).getDaysParticipated();
             System.out.printf("AVG PAID: %1.2f\n\n", averageCost);
         }
     }
