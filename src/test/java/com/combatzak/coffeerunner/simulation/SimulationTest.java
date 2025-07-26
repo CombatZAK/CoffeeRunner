@@ -1,9 +1,9 @@
 package com.combatzak.coffeerunner.simulation;
 
-import com.combatzak.coffeerunner.console.SimpleTeamController;
 import com.combatzak.coffeerunner.control.BaseTeamController;
 import com.combatzak.coffeerunner.control.ITeamController;
 import com.combatzak.coffeerunner.control.ITeamStorageContext;
+import com.combatzak.coffeerunner.control.RollingAverageTeamController;
 import com.combatzak.coffeerunner.model.DrinkOrder;
 import com.combatzak.coffeerunner.model.Teammate;
 import com.combatzak.coffeerunner.util.DuplicateKeyException;
@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 public class SimulationTest {
     protected static class UserRecord {
         public int daysPaid = 0;
+        public int daysParticipated = 0;
         public double moneyPaid = 0.0;
         public double received = 0.0;
     }
@@ -32,7 +33,6 @@ public class SimulationTest {
                 "Jim",
                 new DrinkOrder("Coffee 16oz", null, 2.0),
                 true,
-                0.0,
                 null
         ));
 
@@ -40,7 +40,6 @@ public class SimulationTest {
                 "Bob",
                 new DrinkOrder("Cappuccino", "2% milk", 6.0),
                 true,
-                0.0,
                 null
         ));
 
@@ -48,15 +47,13 @@ public class SimulationTest {
                 "Dustin",
                 new DrinkOrder("Coffee 20oz", "Espresso shot", 4.75),
                 true,
-                0.0,
                 null
         ));
 
-        testTeam.put("Irinna", new Teammate(
-                "Irinna",
+        testTeam.put("Irina", new Teammate(
+                "Irina",
                 new DrinkOrder("Americano", "2 sugar", 5.60),
                 true,
-                0.0,
                 null
         ));
 
@@ -64,7 +61,6 @@ public class SimulationTest {
                 "Adrian",
                 new DrinkOrder("Double espresso", null, 5.25),
                 true,
-                0.0,
                 null
         ));
 
@@ -72,7 +68,6 @@ public class SimulationTest {
                 "Alex",
                 new DrinkOrder("Mocha", null, 4.0),
                 true,
-                0.0,
                 null
         ));
 
@@ -80,12 +75,11 @@ public class SimulationTest {
                 "Luke",
                 new DrinkOrder("Mocha", null, 4.0),
                 true,
-                0.0,
                 null
         ));
 
         ITeamStorageContext mockStorageContext = mock(ITeamStorageContext.class);
-        ITeamController teamController = new SimpleTeamController(mockStorageContext);
+        ITeamController teamController = new RollingAverageTeamController(mockStorageContext);
 
         LocalDate runningDate = LocalDate.parse("2000-01-01");
         long iteration = 0;
@@ -108,12 +102,31 @@ public class SimulationTest {
             staticController.when(BaseTeamController.DateController::getNewDate).thenReturn(runningDate.plusDays(iteration));
 
             for (; iteration < 3653; iteration++) {
+                if (iteration == 1826) {
+                    testTeam.put("Zach", new Teammate(
+                            "Zach",
+                            new DrinkOrder("Nitro cold brew", "vanilla cream", 6.95),
+                            true,
+                            null
+                    ));
+
+                    testTeam.get("Bob").getRegularOrder().setDrinkOptions("large, extra shot");
+                    testTeam.get("Bob").getRegularOrder().setPrice(8.00);
+
+                    teamController.addOrUpdateTeammate(testTeam.get("Zach"));
+
+                    resultData.put("Zach", new UserRecord());
+                    orderList = new HashMap<>();
+                    orderTotal += 7.95;
+                }
+
                 Teammate payer = teamController.processOrder(orderList);
 
                 resultData.get(payer.getName()).daysPaid++;
                 resultData.get(payer.getName()).moneyPaid += orderTotal;
 
                 for (Teammate teammate : testTeam.values()) {
+                    resultData.get(teammate.getName()).daysParticipated++;
                     if (teammate == payer) {
                         continue;
                     }
@@ -125,11 +138,10 @@ public class SimulationTest {
 
         for (Map.Entry<String, UserRecord> entry : resultData.entrySet()) {
             System.out.printf("NAME: %1s\n", entry.getKey());
-            System.out.printf("DAYS PAID: %1s\n", entry.getValue().daysPaid);
-            System.out.printf("MONEY PAID: %1.2f\n", entry.getValue().moneyPaid);
-            System.out.printf("VALUE RECEIVED: %1.2f\n", entry.getValue().received);
+            System.out.printf("DAYS PAID: %1s\n", testTeam.get(entry.getKey()).getDaysPaid());
+            System.out.printf("MONEY PAID: %1.2f\n", testTeam.get(entry.getKey()).getTotalPaid());
 
-            double averageCost = entry.getValue().moneyPaid / (double)3653;
+            double averageCost = testTeam.get(entry.getKey()).getTotalPaid() / (double)testTeam.get(entry.getKey()).getDaysParticipated();
             System.out.printf("AVG PAID: %1.2f\n\n", averageCost);
         }
     }

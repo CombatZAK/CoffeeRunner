@@ -1,6 +1,7 @@
 package com.combatzak.coffeerunner.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -14,10 +15,10 @@ import java.util.Comparator;
 /**
  * Serializable object representing a team member
  */
-@JsonIgnoreProperties(value = "active")
+@JsonIgnoreProperties(value = {"active", "averageDailySpend", "spendCostRatio", "averageOrder"})
 public class Teammate {
     public static final Comparator<Teammate> defaultComparer = (o1, o2) -> {
-        int compareWeight = Double.compare(o1.getWeight(), o2.getWeight());
+        int compareWeight = Double.compare(o1.getTotalDrinkCost(), o2.getTotalDrinkCost());
 
         if (compareWeight != 0) {
             return compareWeight;
@@ -36,6 +37,16 @@ public class Teammate {
         return o1.getLastPurchase().compareTo(o2.getLastPurchase()) * -1;
     };
 
+    public static final Comparator<Teammate> rollingAverageComparaer = (o1, o2) -> {
+        if (o1.getSpendCostRatio() == 0.0) {
+            return (o2.getSpendCostRatio() == 0.0) ? 0 : -1;
+        }
+        if (o2.getSpendCostRatio() == 0.0) {
+            return (o1.getSpendCostRatio() == 0.0) ? 0 : 1;
+        }
+        return  Double.compare(o1.getSpendCostRatio(), o2.getSpendCostRatio());
+    };
+
     @JsonProperty(value = "name", index = 0, required = true)
     private String name;
 
@@ -45,10 +56,19 @@ public class Teammate {
     @JsonProperty(value = "is_active", index = 2)
     private boolean isActive;
 
-    @JsonProperty(value = "weight", index = 3)
-    private double weight = 0.0;
+    @JsonProperty(value = "total_drink_cost", index = 3)
+    private double totalDrinkCost = 0.0;
 
-    @JsonProperty(value = "last_purchase", index = 4)
+    @JsonProperty(value = "days_participated", index = 4)
+    private int daysParticipated = 0;
+
+    @JsonProperty(value = "days_paid", index = 5)
+    private int daysPaid = 0;
+
+    @JsonProperty(value = "total_paid", index = 6)
+    private double totalPaid = 0.0;
+
+    @JsonProperty(value = "last_purchase", index = 7)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -61,16 +81,15 @@ public class Teammate {
      * @param isActive Set to true if this teammate should be part of a "default" coffee run
      * @param lastPurchase Last date the team member purchased drinks
      */
-    public Teammate(String name, DrinkOrder regularOrder, boolean isActive, double weight, LocalDate lastPurchase) {
+    public Teammate(String name, DrinkOrder regularOrder, boolean isActive, LocalDate lastPurchase) {
         this.name = name;
         this.regularOrder = regularOrder;
         this.isActive = isActive;
-        this.weight = weight;
         this.lastPurchase = lastPurchase;
     }
 
     public Teammate() {
-        this(null, null, true, 0.0, null);
+        this(null, null, true, null);
     }
 
     /**
@@ -107,18 +126,18 @@ public class Teammate {
     }
 
     /**
-     * Represents the running sum value  of all drinks the teammate has received since they last paid for drinks
+     * Total cost of all drinks the teammate has ordered
      */
-    public double getWeight() {
-        return weight;
+    public double getTotalDrinkCost() {
+        return totalDrinkCost;
     }
 
-    public void setWeight(double weight) {
-        this.weight = weight;
+    public void setTotalDrinkCost(double totalDrinkCost) {
+        this.totalDrinkCost = totalDrinkCost;
     }
 
-    public void incrementWeight(double weight) {
-        this.weight += weight;
+    public void incrementTotalCost(double weight) {
+        this.totalDrinkCost += weight;
     }
 
     /**
@@ -130,5 +149,62 @@ public class Teammate {
 
     public void setLastPurchase(LocalDate lastPurchase) {
         this.lastPurchase = lastPurchase;
+    }
+
+    public int getDaysParticipated() {
+        return daysParticipated;
+    }
+
+    public void setDaysParticipated(int daysParticipated) {
+        this.daysParticipated = daysParticipated;
+    }
+
+    public void incrementDaysParticipated() {
+        ++this.daysParticipated;
+    }
+
+    public int getDaysPaid() {
+        return daysPaid;
+    }
+
+    public void setDaysPaid(int daysPaid) {
+        this.daysPaid = daysPaid;
+    }
+
+    public void incrementDaysPaid() {
+        ++this.daysPaid;
+    }
+
+    public double getTotalPaid() {
+        return totalPaid;
+    }
+
+    public void setTotalPaid(double totalPaid) {
+        this.totalPaid = totalPaid;
+    }
+
+    public void incrementTotalPaid(double totalPaid) {
+        this.totalPaid += totalPaid;
+    }
+
+    public double getAverageDailySpend() {
+        if (daysParticipated == 0) {
+            return 0;
+        }
+
+        return this.totalPaid / (double)this.daysParticipated;
+    }
+
+    public double getAverageOrder() {
+        if (daysParticipated == 0) {
+            return 0;
+        }
+
+        return this.totalDrinkCost / (double)this.daysParticipated;
+    }
+
+    public double getSpendCostRatio() {
+        if (daysParticipated == 0 || totalDrinkCost == 0) return 0;
+        return getAverageDailySpend() / getAverageOrder();
     }
 }

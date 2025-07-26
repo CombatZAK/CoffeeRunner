@@ -7,8 +7,6 @@ import org.junit.jupiter.api.*;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -19,8 +17,8 @@ public class JsonTeamStorageContextTest {
     @BeforeAll
     public static void setUp() {
         testCollection = new ArrayList<>();
-        testCollection.add(new Teammate("Jim", new DrinkOrder("Coffee 16oz", null, 2.0), true, 2.0, LocalDate.parse("2025-07-20")));
-        testCollection.add(new Teammate("Bob", new DrinkOrder("Cappuccino", "2% milk", 6.0), true, 0.0, LocalDate.parse("2025-07-21")));
+        testCollection.add(new Teammate("Jim", new DrinkOrder("Coffee 16oz", null, 2.0), true, LocalDate.parse("2025-07-20")));
+        testCollection.add(new Teammate("Bob", new DrinkOrder("Cappuccino", "2% milk", 6.0), true, LocalDate.parse("2025-07-21")));
     }
 
     @Test
@@ -44,7 +42,7 @@ public class JsonTeamStorageContextTest {
         Assertions.assertEquals(testCollection.getFirst().getRegularOrder().getDrinkOptions(), resultList.getFirst().getRegularOrder().getDrinkOptions());
         Assertions.assertEquals(testCollection.getFirst().getRegularOrder().getPrice(), resultList.getFirst().getRegularOrder().getPrice());
         Assertions.assertEquals(testCollection.getFirst().isActive(), resultList.getFirst().isActive());
-        Assertions.assertEquals(testCollection.getFirst().getWeight(), resultList.getFirst().getWeight());
+        Assertions.assertEquals(testCollection.getFirst().getTotalDrinkCost(), resultList.getFirst().getTotalDrinkCost());
         Assertions.assertEquals(testCollection.getFirst().getLastPurchase(), resultList.getFirst().getLastPurchase());
 
         Assertions.assertEquals(testCollection.getLast().getName(), resultList.getLast().getName());
@@ -52,7 +50,7 @@ public class JsonTeamStorageContextTest {
         Assertions.assertEquals(testCollection.getLast().getRegularOrder().getDrinkOptions(), resultList.getLast().getRegularOrder().getDrinkOptions());
         Assertions.assertEquals(testCollection.getLast().getRegularOrder().getPrice(), resultList.getLast().getRegularOrder().getPrice());
         Assertions.assertEquals(testCollection.getLast().isActive(), resultList.getLast().isActive());
-        Assertions.assertEquals(testCollection.getLast().getWeight(), resultList.getLast().getWeight());
+        Assertions.assertEquals(testCollection.getLast().getTotalDrinkCost(), resultList.getLast().getTotalDrinkCost());
         Assertions.assertEquals(testCollection.getLast().getLastPurchase(), resultList.getLast().getLastPurchase());
     }
 
@@ -68,7 +66,7 @@ public class JsonTeamStorageContextTest {
 
         // THEN
         String expected = """
-[{"name":"Jim","regular_order":{"name":"Coffee 16oz","drink_options":null,"price":2.0},"is_active":true,"weight":2.0,"last_purchase":"2025-07-20"},{"name":"Bob","regular_order":{"name":"Cappuccino","drink_options":"2% milk","price":6.0},"is_active":true,"weight":0.0,"last_purchase":"2025-07-21"}]""";
+                [{"name":"Jim","regular_order":{"name":"Coffee 16oz","drink_options":null,"price":2.0},"is_active":true,"total_drink_cost":0.0,"days_participated":0,"days_paid":0,"total_paid":0.0,"last_purchase":"2025-07-20"},{"name":"Bob","regular_order":{"name":"Cappuccino","drink_options":"2% milk","price":6.0},"is_active":true,"total_drink_cost":0.0,"days_participated":0,"days_paid":0,"total_paid":0.0,"last_purchase":"2025-07-21"}]""";
         Assertions.assertEquals(expected, Files.readString(tempFile.toPath()));
 
     }
