@@ -27,7 +27,7 @@ public class MainClassTest {
         // WHEN
         try (MockedStatic<MainClass> mockFileController = mockStatic(MainClass.class)) {
             mockFileController.when(MainClass::getTeamFile).thenReturn(tempFile);
-            mockFileController.when(() -> MainClass.isTeamJsonValid(null)).thenCallRealMethod();
+            mockFileController.when(() -> MainClass.isTeamJsonValid(anyString())).thenCallRealMethod();
             mockFileController.when(() -> MainClass.doInit(null)).thenCallRealMethod();
 
             MainClass.doInit(null);

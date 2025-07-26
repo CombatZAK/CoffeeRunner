@@ -1,6 +1,7 @@
 package com.combatzak.coffeerunner.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -14,7 +15,7 @@ import java.util.Comparator;
 /**
  * Serializable object representing a team member
  */
-@JsonIgnoreProperties(value = "active")
+@JsonIgnoreProperties(value = {"active", "averageDailySpend", "spendCostRatio", "averageOrder"})
 public class Teammate {
     public static final Comparator<Teammate> defaultComparer = (o1, o2) -> {
         int compareWeight = Double.compare(o1.getTotalDrinkCost(), o2.getTotalDrinkCost());

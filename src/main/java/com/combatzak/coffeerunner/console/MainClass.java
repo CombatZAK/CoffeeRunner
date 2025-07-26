@@ -193,7 +193,7 @@ ORDER: Produces an order and updates the team history to reflect it.
     protected static Map<String, DrinkOrder> parseOrderList(String json) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.readValue(json, new TypeReference<Map<String, DrinkOrder>>() { });
+            return mapper.readValue(json, new TypeReference<>() { });
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException(String.format("Failed to parse input JSON to order list, '%1s'", json), e);
         }
