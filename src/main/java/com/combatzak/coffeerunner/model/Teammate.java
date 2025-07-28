@@ -204,7 +204,10 @@ public class Teammate {
     }
 
     public double getSpendCostRatio() {
-        if (daysParticipated == 0 || totalDrinkCost == 0) return 0;
-        return getAverageDailySpend() / getAverageOrder();
+        if (this.totalDrinkCost == 0.0) {
+            return 1.0;
+        }
+
+        return this.totalPaid / this.totalDrinkCost;
     }
 }
